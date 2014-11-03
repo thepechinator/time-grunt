@@ -28,7 +28,8 @@
     "figures": "^1.0.0",
     "hooker": "^0.2.3",
     "pretty-ms": "^1.0.0",
-    "text-table": "^0.2.0"
+    "text-table": "^0.2.0",
+    "util-extend": "~1.0.1"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
