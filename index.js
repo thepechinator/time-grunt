@@ -9,6 +9,10 @@ var argv = process.argv.slice(2);
 
 var write = process.stdout.write.bind(process.stdout);
 
+var fs = require('fs');
+var path = require('path');
+var extend = require('util-extend');
+
 function log(str) {
 	write(str + '\n', 'utf8');
 }
@@ -27,6 +31,20 @@ module.exports = function (grunt) {
 		argv.indexOf('-V') !== -1) {
 		return;
 	}
+
+    // Format for the colors config check taken from 
+    // https://github.com/karl-sjogren/jshint-stylish-ex/blob/master/stylish.js
+    var colors = {};
+    if (fs.existsSync(path.resolve('.chalkcolors'))) {
+        var rc = fs.readFileSync('.chalkcolors', {encoding: 'utf8'});
+        colors = JSON.parse(rc);
+    }
+
+    colors = extend({
+        'bar': 'blue',
+        'total': 'magenta',
+        'time': 'gray'
+    }, colors);    
 
 	// crazy hack to work around stupid node-exit
 	// Can this be removed now that node-exit#4 has been resolved?
@@ -106,7 +124,7 @@ module.exports = function (grunt) {
 			if (avg < 0.01 && !grunt.option('verbose')) {
 				return;
 			}
-			return [shorten(row[0]), chalk.blue(prettyMs(row[1])), chalk.blue(createBar(avg))];
+			return [shorten(row[0]), chalk[colors.bar](prettyMs(row[1])), chalk[colors.bar](createBar(avg))];
 		}).reduce(function (acc, row) {
 			if (row) {
 				acc.push(row);
@@ -115,7 +133,7 @@ module.exports = function (grunt) {
 			return acc;
 		}, []);
 
-		tableDataProcessed.push([chalk.magenta('Total', prettyMs(totalTime))]);
+		tableDataProcessed.push([chalk[colors.total]('Total', prettyMs(totalTime))]);
 
 		return table(tableDataProcessed, {
 			align: [ 'l', 'r', 'l' ],
@@ -141,7 +159,7 @@ module.exports = function (grunt) {
 		}
 
 		// `grunt.log.header` should be unhooked above, but in some cases it's not
-		log('\n\n' + chalk.underline('Execution Time') + chalk.gray(' (' + startTimePretty + ')'));
+		log('\n\n' + chalk.underline('Execution Time') + chalk[colors.time](' (' + startTimePretty + ')'));
 		log(formatTable(tableData) + '\n');
 		process.exit(exitCode);
 	});
